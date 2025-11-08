@@ -1,120 +1,150 @@
-# Portfolio
+# Vacation Reviews — Database README
 
-create database VACATION_REVIEWS;
+Overview
+--------
+This repository contains SQL used to create and populate a small personal database called `VACATION_REVIEWS`. The database stores countries visited, destinations within those countries, visit dates, landmarks, and cuisines along with review scores (1–10). It’s intended as a simple travel log and review tracker.
 
+This README documents the schema, how to create/load the database, example queries, and suggestions for future improvements.
+
+Quick start
+-----------
+1. Open your MySQL client (or compatible server).
+2. Run the SQL file that creates the schema and inserts sample records. Example:
+```sql
+-- Creates the database and schema
+CREATE DATABASE VACATION_REVIEWS;
 USE VACATION_REVIEWS;
 
-CREATE TABLE COUNTRY (
-id INT primary KEY auto_increment,
-COUNTRY_NAME VARCHAR(20),
-CONTINENT ENUM ('NORTH AMERICA', 'SOUTH AMERICA', 'EUROPE', 'AFRICA', 'ASIA', 'AUSTRALIA', 'ANTARTICA')
-);
-
-Select * from country; 
-
-create table DESTINATION (
-id INT primary KEY auto_increment,
-DESTINATION_NAME VARCHAR(20),
-COUNTRY_ID INT,
-REVIEW_SCORE INT,
-CHECK (REVIEW_SCORE BETWEEN 1 AND 10),
-FOREIGN KEY (COUNTRY_ID) REFERENCES COUNTRY(ID)
-);
-
-SELECT * FROM DESTINATION;
-
-CREATE TABLE VACATION_DATE (
-id INT PRIMARY KEY AUTO_INCREMENT,
-COUNTRY_ID INT,
-ARRIVE_DATE DATE,
-DEPART_DATE DATE,
-FOREIGN KEY (COUNTRY_ID) REFERENCES COUNTRY(ID) );
-
-Select * from vacation_date;
-
-CREATE TABLE LANDMARK (
-id INT PRIMARY KEY AUTO_INCREMENT,
-LANDMARK_NAME VARCHAR(30),
-DESTINATION_ID INT,
-LANDMARK_REVIEW INT
-CHECK (LANDMARK_REVIEW BETWEEN 1 AND 10),
-FOREIGN KEY (DESTINATION_ID) REFERENCES DESTINATION(ID) );
-
-CREATE TABLE CUISINE (
-id INT PRIMARY KEY AUTO_INCREMENT,
-CUISINE_NAME VARCHAR(30),
-FOOD_TYPE ENUM ('BREAKFAST', 'LUNCH', 'DINNER', 'DESSERT'),
-COUNTRY_ID INT,
-FOOD_REVIEW int
-CHECK (FOOD_REVIEW BETWEEN 1 AND 10),
-FOREIGN KEY (COUNTRY_ID) REFERENCES COUNTRY(ID) );
-
-INSERT INTO COUNTRY (COUNTRY_NAME, CONTINENT)
-VALUES ('ITALY', 'EUROPE'), ('CANADA', 'NORTH AMERICA'), ('UNITED STATES', 'NORTH AMERICA'), ('UNITED ARAB EMIRATES', 'ASIA'), ('SOUTH AFRICA', 'AFRICA'), ('IRELAND', 'EUROPE'), ('GREECE', 'EUROPE'), ('JAPAN', 'ASIA');
-
+-- (run the remainder of the SQL script in this folder)
+```
+3. Verify the tables:
+```sql
+SHOW TABLES;
 SELECT * FROM COUNTRY;
-
-TRUNCATE TABLE COUNTRY;
-
-UPDATE COUNTRY
-SET COUNTRY_NAME = 'IRELAND'
-WHERE ID = 6;
-
 SELECT * FROM DESTINATION;
+SELECT * FROM VACATION_DATE;
+SELECT * FROM LANDMARK;
+SELECT * FROM CUISINE;
+```
 
-SELECT* FROM COUNTRY;
+Schema (tables & columns)
+-------------------------
+Note: types and constraints shown are as in the provided SQL script.
 
-INSERT INTO DESTINATION (DESTINATION_NAME, COUNTRY_ID, REVIEW_SCORE)
-VALUES ('ROME', 1, 6), ('NIAGRA FALLS', 2, 8), ('NOVA SCOTIA', 2, 9), ('BOSTON', 3, 8), ('ATLANTA', 3, 6), ('NEW YORK CITY', 3, 10), ('DUBAI', 4, 7), ('ABU DHABI', 4, 8), ('JOHANNESBURG', 5, 4), ('KRUGER NATIONAL PARK', 5, 9), ('DUBLIN', 6, 8), ('GALWAY', 6, 5), ('ATHENS', 7, 5), ('NAXOS', 7, 8), ('TOKYO', 8, 10), ('ODAWARA', 8, 7);
+- COUNTRY
+  - id INT PRIMARY KEY AUTO_INCREMENT
+  - COUNTRY_NAME VARCHAR(20)
+  - CONTINENT ENUM('NORTH AMERICA','SOUTH AMERICA','EUROPE','AFRICA','ASIA','AUSTRALIA','ANTARTICA')
 
-Select * from destination;
+- DESTINATION
+  - id INT PRIMARY KEY AUTO_INCREMENT
+  - DESTINATION_NAME VARCHAR(20)
+  - COUNTRY_ID INT — foreign key → COUNTRY(id)
+  - REVIEW_SCORE INT — CHECK(REVIEW_SCORE BETWEEN 1 AND 10)
 
-INSERT INTO LANDMARK (LANDMARK_NAME, DESTINATION_ID, LANDMARK_REVIEW)
-VALUES ('SAINT PETERS BASILICA', 1, 7), ('ROMAN COLOSSEUM', 1, 9), ('NIAGRA FALLS OBSERVATION TOWER', 2, 9), ('BAY OF FUNDY', 3, 10), ('HARVARD UNIVERSITY', 4, 6), ('USS CONSTITUTION', 4, 5), ('MUSEUM OF FINE ARTS', 4, 7), ('ATLANTA AQUARIUM', 5, 8), ('CIVIL RIGHTS MUSEUM', 5, 8), ('EMPIRE STATE BUILDING', 6, 7), ('CENTRAL PARK', 6, 9), ('TIMES SQUARE', 6, 7), ('DUBAI MALL', 7, 5), ('FERRARI WORLD', 7, 8), ('AL DHAFRA OASIS', 8, 9), ('PHALABORWA GATE', 10, 10), ('DALKEY CASTLE', 11, 8), ('THE GUINNESS STOREHOUSE', 11, 8), ('WINTERFELL CASTLE AND DEMESNE', 11, 9), ('THE CLIFFS OF MOHER', 12, 10), ('THE PARTHENON', 13, 7), ('ARACHOVA', 14, 10), ('TEMPLE OF APOLLO', 14, 7), ('SKYTREE', 15, 7), ('THE GREAT BUDDHA', 15, 6), ('GOLDEN GAI', 15, 8), ('MOUNT FUJI', 16, 10), ('LAKE ASHI', 16, 8);
+- VACATION_DATE
+  - id INT PRIMARY KEY AUTO_INCREMENT
+  - COUNTRY_ID INT — foreign key → COUNTRY(id)
+  - DESTINATION_ID INT — (added later in script) foreign key → DESTINATION(id)
+  - ARRIVE_DATE DATE
+  - DEPART_DATE DATE
 
-Select * from landmark;
+- LANDMARK
+  - id INT PRIMARY KEY AUTO_INCREMENT
+  - LANDMARK_NAME VARCHAR(30)
+  - DESTINATION_ID INT — foreign key → DESTINATION(id)
+  - LANDMARK_REVIEW INT — CHECK(LANDMARK_REVIEW BETWEEN 1 AND 10)
 
-select* from country;
+- CUISINE
+  - id INT PRIMARY KEY AUTO_INCREMENT
+  - CUISINE_NAME VARCHAR(30)
+  - FOOD_TYPE ENUM('BREAKFAST','LUNCH','DINNER','DESSERT') — later dropped in script
+  - COUNTRY_ID INT — foreign key → COUNTRY(id)
+  - FOOD_REVIEW INT — CHECK(FOOD_REVIEW BETWEEN 1 AND 10)
 
-alter table cuisine
-drop column food_type;
+Constraints & notes
+-------------------
+- Review scores (destination, landmark, food) are constrained to be between 1 and 10 via CHECK clauses where used.
+- Some operations in the SQL include ALTER TABLE to add/modify columns and TRUNCATE operations (they remove all data). Use caution when running those commands.
+- The script demonstrates iterative development: adding DESTINATION_ID to VACATION_DATE, dropping a column (food_type), truncating tables, and updating rows.
+- The script uses literal date values in YYYY-MM-DD format for ARRIVE_DATE and DEPART_DATE.
 
-select * from cuisine;
-
-Insert into cuisine (cuisine_name, country_id, food_review)
-values ('CALAMARI', 1, 8), ('POUTINE', 2, 9), ('BUFFALO WINGS', 3, 9), ('DATES', 4, 7), ('SNOEK FISH', 5, 8), ('IRISH BREAKFAST', 6, 8), ('SPANAKOPITA', 7, 7), ('SUSHI', 8, 8);
-
-select * from vacation_date;
-
-Insert into vacation_DATE (country_id, arrive_date, depart_date)
-values (1, '2006-07-03', '2006-07-21'), (2, '2007-08-21', '2007-08-26'), (2, '2011-06-18', '2011-06-21');
-
-alter table vacation_date
-MODIFY COLUMN DESTINATION_ID INT;
-
-ALTER TABLE VACATION_DATE
-ADD CONSTRAINT DESTINATION_ID
-FOREIGN KEY (DESTINATION_ID) REFERENCES DESTINATION(ID);
-
-INSERT INTO VACATION_DATE (DESTINATION_ID)
-VALUES (1);
-
-TRUNCATE TABLE VACATION_DATE;
-
-select * from vacation_date;
-SELECT * FROM DESTINATION;
+Example queries
+---------------
+- List all countries:
+```sql
 SELECT * FROM COUNTRY;
+```
 
-Insert into vacation_DATE (country_id, DESTINATION_ID, arrive_date, depart_date)
-values (1, 1, '2006-07-03', '2006-07-21'), (2, 3, '2007-08-21', '2007-08-26'), (2, 2, '2011-06-18', '2011-06-21'),
-(3, 4, '2024-08-30', '2024-09-03'), (3, 5, '2017-08-29', '2017-09-02'), (3, 5, '2021-08-28', '2021-09-02'), (3, 6, '2022-05-21', '2022-05-22'), (3, 6, '2023-12-16', '2023-12-16'), (3,6, '2025-07-16', '2025-07-17'),
-(4, 7, '2018-03-10', '2018-03-17'), (4, 8, '2018-03-10', '2018-03-17'), (5, 9, '2018-05-17', '2018-05-22'), (5, 10, '2018-05-17', '2018-05-22'),
-(6, 11, '2022-09-21', '2022-09-28'), (6, 12, '2022-09-21', '2022-09-28'), (7,14, '2023-09-23', '2023-09-30'), (7,15, '2023-09-23', '2023-09-30'),
-(8, 15, '2024-04-19', '2024-04-27'), (8, 16, '2024-04-19', '2024-04-27');
+- List destinations with country names and scores:
+```sql
+SELECT d.id, d.DESTINATION_NAME, c.COUNTRY_NAME, d.REVIEW_SCORE
+FROM DESTINATION d
+JOIN COUNTRY c ON d.COUNTRY_ID = c.id
+ORDER BY d.REVIEW_SCORE DESC;
+```
 
-select * from vacation_date;
-select * from country;
-select * from destination;
+- All landmarks for a destination:
+```sql
+SELECT l.LANDMARK_NAME, l.LANDMARK_REVIEW
+FROM LANDMARK l
+WHERE l.DESTINATION_ID = <destination_id>;
+```
 
-select * from landmark;
-select * from cuisine;
+- Travel history (dates joined to destination and country):
+```sql
+SELECT vd.arrive_date, vd.depart_date, dest.DESTINATION_NAME, c.COUNTRY_NAME
+FROM VACATION_DATE vd
+LEFT JOIN DESTINATION dest ON vd.DESTINATION_ID = dest.id
+LEFT JOIN COUNTRY c ON vd.COUNTRY_ID = c.id
+ORDER BY vd.arrive_date;
+```
+
+- Average review per country (destinations):
+```sql
+SELECT c.COUNTRY_NAME, AVG(d.REVIEW_SCORE) AS avg_score
+FROM DESTINATION d
+JOIN COUNTRY c ON d.COUNTRY_ID = c.id
+GROUP BY c.id, c.COUNTRY_NAME
+ORDER BY avg_score DESC;
+```
+
+- Top-rated cuisines:
+```sql
+SELECT cuisine_name, food_review, COUNTRY_ID
+FROM CUISINE
+ORDER BY food_review DESC
+LIMIT 10;
+```
+
+Sample data actions present in script
+-----------------------------------
+- Insertion examples for COUNTRY, DESTINATION, LANDMARK, CUISINE, VACATION_DATE are included in the SQL file.
+- The script also contains TRUNCATE TABLE operations and UPDATEs; these modify or clear sample data. Review and edit those lines if you want to keep sample data.
+
+Practical tips
+--------------
+- Back up data before running scripts that contain TRUNCATE or destructive UPDATE statements.
+- If your MySQL version enforces stricter CHECK support, validate whether CHECK clauses are enforced or need additional handling.
+- Consider adding indexes for faster JOINs on foreign keys (e.g., DESTINATION.COUNTRY_ID, VACATION_DATE.DESTINATION_ID).
+- If you want multi-user or per-review attribution, add a USERS table and link reviews to user IDs.
+
+Suggested improvements
+----------------------
+- Normalize the CONTINENT values into a separate CONTINENT table and reference by id.
+- Add timestamps (created_at, updated_at) to review rows for auditing.
+- Add a USERS table (id, name, email) if you want to record which user added which review.
+- Add ON DELETE/ON UPDATE behaviors to foreign keys (CASCADE, SET NULL) to control referential changes.
+- Expand text lengths where necessary (e.g., country or destination names longer than current VARCHAR limits).
+- Add constraints to ensure ARRIVE_DATE <= DEPART_DATE in VACATION_DATE (CHECK or application logic).
+
+Author / Contact
+----------------
+- Database & script: Scummins52 (owner of this repo)
+- For questions about the schema or sample data, open an issue in the repository or contact the repo owner.
+
+License
+-------
+This repository follows the license declared at the repository root (if any). Check the main repo for licensing details.
+
+Enjoy exploring your travel history and reviews!
